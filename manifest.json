@@ -1,0 +1,18 @@
+{
+  "name": "MyBookmarkSearch on Google for Chrome",
+  "background_page": "background.html",
+  "content_scripts": [
+    {
+      "css": [ "google.css" ],
+      "js": [ "google.js" ],
+      "run_at": "document_start",
+      "matches": [ "http://www.google.com/search*" ]
+    }
+  ]
+  "version": "0.1",
+
+  "permissions": [
+    "http://b.hatena.ne.jp/my.name",
+    "http://b.hatena.ne.jp/*/search/json*"
+  ]
+}

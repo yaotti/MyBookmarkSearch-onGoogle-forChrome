@@ -1,0 +1,22 @@
+<html>
+<head>
+<script>
+chrome.extension.onRequest.addListener(function(query, sender, onSuccess) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', query, true);
+    xhr.onreadystatechange = function (e) {
+      if (xhr.readyState == 4) {
+        if (xhr.status == 200) {
+            onSuccess(xhr.responseText);
+        } else {
+          //alert('error');
+        }
+      }
+    };
+    xhr.send(null);
+
+});
+</script>
+</head>
+<body></body>
+</html>
