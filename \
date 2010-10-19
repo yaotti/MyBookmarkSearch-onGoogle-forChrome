@@ -1,0 +1,62 @@
+// ブックマーク検索のリクエストURI作るもの
+var BookmarkSearch = function() {
+    this.userName = '';
+    this.q        = '';
+    this.of       = '10';   // offset
+    this.limit    = '10';   // max 100
+    this.sort     = 'date'; // date, scores, users
+}
+
+BookmarkSearch.prototype = {
+    setUserName : function() {
+	    chrome.extension.sendRequest('http://b.hatena.ne.jp/my.name',
+            function onSuccess(res) {
+                this.userName = JSON.parse(res).name;
+                //alert('makeUserName');
+                console.log(this.userName);
+                return res;
+	    });
+    },
+    setSearchWords : function() {
+        var params = window.location.search.substring(1).split('&');
+        params.forEach(function(elm) {
+            if (/^q=(.+)/.test(elm)) this.q = elm.split('=')[1];
+        });
+    },
+    makeQuery : function() {
+        //alert('makeQuery');
+        var query =  'http://b.hatena.ne.jp/' + this.userName + '/search/json';
+        query    += '?q=' + this.q + '&limit=' + this.limit + '&sort=' + this.sort;
+        console.log(query);
+        return query;
+    },
+    searchBookmarks : function() {
+        var res = this.setUserName(); // イベント。順番ズレる
+        res.onload = function() {
+            this.setSearchWords();
+	        chrome.extension.sendRequest(this.makeQuery(), function onSuccess(res) {
+                var json = JSON.parse(res);
+                console.log(json);
+                return json; // とりあえず生のまま
+	        });
+        }
+    },
+
+};
+
+//Googleから盗みはてなに投げ、レスポンスもらうまで
+(function() {
+    //set
+    var searcher = new BookmarkSearch();
+    var data = searcher.searchBookmarks();
+    //console.log(data);
+    if (data) {
+        console.log('All tests successful');
+    }
+
+    // DOMにさわる
+    window.onload = function() {
+    }
+
+})();
+
