@@ -10,7 +10,7 @@
     }
   ],
   "version": "0.2",
-  "update_url": "http://cske.sakura.ne.jp/work/hatebu_chrome/update.xml",
+  "update_url": "http://cske.sakura.ne.jp/work/hatebu_chrome/updates.xml",
 
   "permissions": [
     "http://b.hatena.ne.jp/my.name",

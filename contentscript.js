@@ -1,7 +1,7 @@
 var BookmarkSearch = function() {
     this.userName = undefined;
     this.q        = '';
-    this.of       = '10';   // offset
+    this.of       = '0';    // offset
     this.limit    = '10';   // max 100
     this.sort     = 'date'; // date, scores, users
 }
