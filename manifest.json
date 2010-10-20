@@ -4,7 +4,8 @@
   "content_scripts": [
     {
       "js": [ "contentscript.js" ],
-      "run_at": "document_start",
+      "css": [ "style.css" ],
+      "run_at": "document_end",
       "matches": [ "http://www.google.co.jp/*" ]
     }
   ],

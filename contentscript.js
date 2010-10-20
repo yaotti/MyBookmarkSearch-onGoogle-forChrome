@@ -1,3 +1,4 @@
+
 // ブックマーク検索のリクエストURI作るもの
 var BookmarkSearch = function() {
     this.userName = undefined;
@@ -24,7 +25,7 @@ BookmarkSearch.prototype = {
     },
     makeQuery : function() {
         var query =  'http://b.hatena.ne.jp/' + this.userName + '/search/json';
-        query    += '?q=' + this.q + '&limit=' + this.limit + '&sort=' + this.sort;
+        query     += '?q=' + this.q + '&limit=' + this.limit + '&sort=' + this.sort;
         return query;
     },
     searchBookmarks : function(onSearch) {
@@ -42,123 +43,146 @@ BookmarkSearch.prototype = {
 
 };
 
-function styleInitter(entries) {
-    if (entries.length < 1) {
-        alert('一致する情報は見つかりませんでした。');
-        return;
-    }
-
-    var sideTable = document.querySelector('#mbEnd');
-    if(sideTable){
-        for (var i = 0; i < sideTable.rows.length; i++){
-            sideTable.deleteRow(i);
-        }
-    }else{
-        sideTable = elem('table', 'mbEnd');
-    }
+function SearchResults(entries) {
+    this.entries      = entries;
+    this.dfOfAllEntries = document.createDocumentFragment();
+    this.rhs          = elem('div', {id:'rhs'});
 }
-function showSearchResults(entries) {
-    var searchResults = elem('dl', {class:'hBookmark-search-results', ns: 1});
-
-    for (var i = 0; i < entries.length; i++) {
-        var entry = entries[i];
-
-        var commentText = entry.comment; //
-        var entryURL    = entry.entry.url
-        var titleText   = entry.entry.title;
-        var snippetText = entry.entry.snippet;
-        var bookmarkSrc = 'http://b.hatena.ne.jp/entry/image/' + entryURL;
-        var faviconURL  = 'http://favicon.st-hatena.com/?url=' + entryURL;
-        var host        = entryURL.match(/^https?:\/\/(.+)/)[1];
-
-
-        // タイトル部
-        var title        = elem('dd');
-
-        var titleLink    = elem('a');
-        titleLink.target = '_blank';
-        titleLink.href   = entryURL;
-
-        var favicon      = elem('img');
-        favicon.src      = faviconURL;
-
-        titleLink.appendChild( favicon );
-        titleLink.appendChild( text(titleText) );
-        title.appendChild(titleLink);
-
-
-        // snippet
-        var snippet = elem('dd', {class:'hBookmark-search-snippet'});
-        snippet.appendChild( text(snippetText) );
-            // TODO 一致文字の置換（comment, snippet）
-
-
-        // comment
-        var comment = elem('dd', {class:'hBookmark-search-comment'});
-        if (commentText) {
-            comment.appendChild( text(commentText) );
-            // TODO [tag]をマークアップに置換
+SearchResults.prototype = {
+    show : function() {
+        if (!this.searchResultsExists) {
+            return;
         }
+        this.makeDfOfAllEntries(); // TODO これ以降のどれかでエラーが起きてもその後の処理をすべて中止する
+        this.initRightNav();
+        this.makeRightNav();
+        this.insert();
+    },
+    searchResultsExists : function() {
+        return  (this.entries.length < 1) ? 1 : 0;
+    },
+    makeDfOfAllEntries : function() {
+        for (var i = 0; i < this.entries.length; i++) {
+            var entry = this.entries[i];
+
+            var commentText = entry.comment; //
+            var entryURL    = entry.entry.url
+            var titleText   = entry.entry.title;
+            var snippetText = entry.entry.snippet;
+            var bookmarkSrc = 'http://b.hatena.ne.jp/entry/image/' + entryURL;
+            var faviconURL  = 'http://favicon.st-hatena.com/?url=' + entryURL;
+            var host        = entryURL.match(/^https?:\/\/(.+)/)[1];
 
 
-        // info
-        var info             = elem('dd', {class:'hBookmark-search-info'});
+            // タイトル部
+            var title        = elem('dd');
 
-        var searchURL        = elem('span', {class:'hBookmark-search-url'});
-        var hostMin          = host;
-        if (host.length > 40) { hostMin = host.substr(0,40) + '…' }
-        searchURL.appendChild( text(hostMin) );
+            var titleLink    = elem('a');
+            titleLink.target = '_blank';
+            titleLink.href   = entryURL;
 
-        var bookmarkImg      = elem('img');
-        bookmarkImg.src      = bookmarkSrc;
-        var bookmarkCount    = elem('a');
-        bookmarkCount.target = '_blank';
-        bookmarkCount.href   = 'http://b.hatena.ne.jp/entry/' + host;
-        bookmarkCount.appendChild( bookmarkImg );
+            var favicon      = elem('img');
+            favicon.src      = faviconURL;
 
-        info.appendChild( searchURL );
-        info.appendChild( bookmarkCount );
+            titleLink.appendChild( favicon );
+            titleLink.appendChild( text(titleText) );
+            title.appendChild(titleLink);
 
 
-        // すべて突っ込む
-        var df = document.createDocumentFragment();
-        df.appendChild(title);
-        df.appendChild( snippet );
-        df.appendChild( comment );
-        df.appendChild( info );
-        searchResults.appendChild( df );
-    }
-    document.body.insertBefore(searchResults, document.body.firstChild);
-    // make container
-    var searchnerInfo   = elem('div', {class:'hBookmark-search-info', ns:1});
-    var searchMore      = elem('div', {class:'hBookmark-search-more', ns:1})
-    var searchContainer = elem('div', {class:'hBookmark-search-container'})
+            // snippet
+            var snippet = elem('dd', {class:'hBookmark-search-snippet'});
+            snippet.appendChild( text(snippetText) );
+                // TODO 一致文字の置換（comment, snippet）
 
-    searchContainer.appendChild( searchInfo );
-    searchContainer.appendChild( searchResults );
-    searchContainer.appendChild( searchMore );
 
-    var searchHeading   = elem('div', {class:'hBookmark-search-heading'})
-    var searchnerDiv    = elem('div', {id:'hBookmark-search', ns:1})
+            // comment
+            var comment = elem('dd', {class:'hBookmark-search-comment'});
+            if (commentText) {
+                comment.appendChild( text(commentText) );
+                // TODO [tag]をマークアップに置換
+            }
 
-    searchDiv.appendChild( searchHeading );
-    searchDiv.appendChild( searchContainer );
-}
+
+            // info
+            var info             = elem('dd', {class:'hBookmark-search-info'});
+
+            var searchURL        = elem('span', {class:'hBookmark-search-url'});
+            var hostMin          = host;
+            if (host.length > 40) { hostMin = host.substr(0,40) + '…' }
+            searchURL.appendChild( text(hostMin) );
+
+            var bookmarkImg      = elem('img');
+            bookmarkImg.src      = bookmarkSrc;
+            var bookmarkCount    = elem('a');
+            bookmarkCount.target = '_blank';
+            bookmarkCount.href   = 'http://b.hatena.ne.jp/entry/' + host;
+            bookmarkCount.appendChild( bookmarkImg );
+
+            info.appendChild( searchURL );
+            info.appendChild( bookmarkCount );
+
+
+            // すべて突っ込む
+            var dfEntry = document.createDocumentFragment();
+            dfEntry.appendChild(title);
+            dfEntry.appendChild( snippet );
+            dfEntry.appendChild( comment );
+            dfEntry.appendChild( info );
+            this.dfOfAllEntries.appendChild( dfEntry );
+        }
+    },
+    initRightNav : function() {
+        var rightNav = document.querySelector('#rhs');
+        if(rightNav){
+            rightNav.parentNode.removeChild(rightNav);
+        }
+    },
+    makeRightNav : function() {
+        // table
+        var searchResults   = elem('dl',  {class:'hBookmark-search-results', ns: 1});
+        searchResults.appendChild( this.dfOfAllEntries );
+        var searchInfo      = elem('div', {class:'hBookmark-search-info', ns:1});
+        var searchMore      = elem('div', {class:'hBookmark-search-more', ns:1});
+
+        var searchContainer = elem('div', {class:'hBookmark-search-container'});
+        searchContainer.appendChild( searchInfo );
+        searchContainer.appendChild( searchResults );
+        searchContainer.appendChild( searchMore );
+        var searchHeading   = elem('div', {class:'hBookmark-search-heading'});
+
+        var searchDiv       = elem('div', {id:'hBookmark-search', ns:1});
+        searchDiv.appendChild( searchHeading );
+        searchDiv.appendChild( searchContainer );
+
+        var mbEnd           = elem('table', {id:'mbEnd'});
+        var mbEndCell = mbEnd.insertRow(0).insertCell(0);
+        mbEndCell.appendChild(searchDiv);
+
+        var rhsBlock        = elem('div', {id:'rhs_block'});
+        rhsBlock.appendChild( mbEnd );
+        this.rhs.appendChild( rhsBlock );
+        console.log(this.rhs); // ここまでうまくいってる！！！！！１
+    },
+    insert : function() {
+        var leftNav = document.querySelector('#leftnav');
+        console.log(leftNav);
+        leftNav.parentNode.insertBefore(this.rhs, leftNav);
+        this.rhs.style.position = 'absolute';
+        this.rhs.style.right    = '0';
+        this.rhs.style.top      = '0';
+        this.rhs.style.width    = '264px';
+    },
+};
 
 //Googleから盗みはてなに投げ、レスポンスもらうまで
 (function() {
     //set
     var searcher = new BookmarkSearch();
-    searcher.searchBookmarks(function onSearch(json){
+    searcher.searchBookmarks(function onSearch(results){
 
-        var entries = json.bookmarks;
-
-        styleInitter(entries);
-
-        showSearchResults(entries);
+        var searchResults = new SearchResults(results.bookmarks);
+        searchResults.show();
     });
-
-
 })();
 
 // Utils

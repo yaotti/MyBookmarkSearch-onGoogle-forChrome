@@ -1,0 +1,152 @@
+/* ============================================================ */
+/* Google                                                       */
+/* ============================================================ */
+
+body, td, div, .p, a {
+    font-family:arial,sans-serif;
+}
+
+#rhs {
+    border-left:1px solid #D3E1F9;
+    display:block;
+    position:absolute;
+    right:0;
+    top:0;
+    width:264px;
+}
+
+#rhs_block {
+    padding-top:5px;
+    margin-bottom:-20px;
+}
+
+#mbEnd, .rhss {
+    padding:0;
+    white-space:nowrap;
+    margin:0 0 32px 8px;
+}
+
+/* ============================================================ */
+/* Hatena                                                       */
+/* ============================================================ */
+
+#hBookmark-search {
+color:#000000;
+float:right;
+font-size:1em;
+line-height:1.4;
+margin:0;
+max-width:25em;
+padding:0;
+width:30%;
+}
+#hBookmark-search span, #hBookmark-search a, #hBookmark-search b, #hBookmark-search em, #hBookmark-search img, #hBookmark-search div, #hBookmark-search dl, #hBookmark-search dt, #hBookmark-search dd {
+background:none repeat scroll 0 0 transparent;
+border:medium none;
+color:inherit;
+font:inherit;
+margin:0;
+padding:0;
+}
+#hBookmark-search :link {
+color:#2200CC;
+text-decoration:underline;
+}
+#hBookmark-search :visited {
+color:#551A8B;
+text-decoration:underline;
+}
+#hBookmark-search .hBookmark-search-heading {
+border-bottom:1px solid #C9D7F1;
+margin-bottom:0.3em;
+overflow:hidden;
+padding-bottom:0.2em;
+position:relative;
+}
+#hBookmark-search .hBookmark-search-title {
+background:url("http://b.st-hatena.com/images/favicon.gif") no-repeat scroll left center transparent;
+font-weight:bold;
+padding-left:18px;
+}
+#hBookmark-search .hBookmark-search-user {
+color:inherit;
+display:inline-block;
+float:right;
+font-size:12px;
+margin-bottom:1em;
+text-align:right;
+text-decoration:none;
+white-space:nowrap;
+}
+#hBookmark-search a > img {
+margin:0 3px -5px 0;
+}
+#hBookmark-search .hBookmark-search-status {
+font-size:12px;
+}
+#hBookmark-search div.hBookmark-search-container {
+}
+#hBookmark-search dl {
+clear:both;
+margin:0;
+padding:0 0 10px 20px;
+}
+#hBookmark-search dt {
+margin-top:1em;
+}
+#hBookmark-search dd {
+font-size:90%;
+margin:0.2em 0;
+}
+#hBookmark-search .hBookmark-search-comment {
+color:#777777;
+}
+#hBookmark-search .hBookmark-search-tag {
+color:#6666CC;
+}
+#hBookmark-search dd.hBookmark-search-info {
+}
+#hBookmark-search .hBookmark-search-url {
+color:green;
+margin-right:3px;
+}
+#hBookmark-search a.hBookmark-search-counter {
+display:inline-block;
+}
+#hBookmark-search dt > a > img {
+margin-left:-20px;
+position:relative;
+}
+#hBookmark-search .hBookmark-search-many {
+background-color:#FFF0F0;
+color:#FF6666;
+font-weight:bold;
+}
+#hBookmark-search .hBookmark-search-too-many {
+background-color:#FFCCCC;
+color:#FF0000;
+font-weight:bold;
+}
+#hBookmark-search .hBookmark-search-more {
+margin:0.5em 0 0;
+text-align:right;
+}
+#hBookmark-search .hBookmark-search-more > a {
+background:url("http://b.st-hatena.com/images/favicon.gif") no-repeat scroll left center transparent;
+color:#7777CC;
+padding-left:18px;
+}
+#hBookmark-search .hBookmark-search-query, #hBookmark-search em {
+font-weight:bold;
+}
+td > #hBookmark-search {
+float:none;
+margin:1em 0 0;
+white-space:normal;
+width:auto;
+}
+div > #hBookmark-search {
+font-size:0.8em;
+margin-left:0.6em;
+}
+
