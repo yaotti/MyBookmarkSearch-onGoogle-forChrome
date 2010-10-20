@@ -1,5 +1,3 @@
-
-// ブックマーク検索のリクエストURI作るもの
 var BookmarkSearch = function() {
     this.userName = undefined;
     this.q        = '';
@@ -11,8 +9,7 @@ var BookmarkSearch = function() {
 BookmarkSearch.prototype = {
     setUserName : function(onSetUserName) {
         var that = this;
-	    chrome.extension.sendRequest('http://b.hatena.ne.jp/my.name',
-            function onSuccess(res) {
+	    chrome.extension.sendRequest('http://b.hatena.ne.jp/my.name', function onSuccess(res) {
                 that.userName = JSON.parse(res).name;
                 onSetUserName();
 	    });
@@ -30,36 +27,37 @@ BookmarkSearch.prototype = {
     },
     searchBookmarks : function(onSearch) {
         var that = this;
-        // setSearchWordsやmakeQueryをsetUserNameの後にやらせたい…ので
-        // setUserNameのonSuccess関数に突っ込む。しかし美しいやり方ではない気が…。
         this.setUserName(function onSetUserName() {
             that.setSearchWords();
 	        chrome.extension.sendRequest(that.makeQuery(), function onSuccess(res) {
                 var json = JSON.parse(res);
                 onSearch(json);
 	        });
-        }); // イベント。順番ズレる
+        });
     },
 
 };
 
+
 function SearchResults(entries) {
-    this.entries      = entries;
+    this.entries        = entries;
+    this.searchSuccess  = 0;
     this.dfOfAllEntries = document.createDocumentFragment();
-    this.rhs          = elem('div', {id:'rhs'});
+    this.rhs            = elem('div', {id:'rhs'});
 }
+
 SearchResults.prototype = {
     show : function() {
-        if (!this.searchResultsExists) {
-            return;
+        if (this.searchResultsExists()) {
+            this.searchSuccess = 1;
+            this.makeDfOfAllEntries();
         }
-        this.makeDfOfAllEntries(); // TODO これ以降のどれかでエラーが起きてもその後の処理をすべて中止する
         this.initRightNav();
         this.makeRightNav();
         this.insert();
     },
     searchResultsExists : function() {
-        return  (this.entries.length < 1) ? 1 : 0;
+        return  (this.entries.length) ? 1 : 0;
     },
     makeDfOfAllEntries : function() {
         for (var i = 0; i < this.entries.length; i++) {
@@ -75,7 +73,7 @@ SearchResults.prototype = {
 
 
             // タイトル部
-            var title        = elem('dd');
+            var title        = elem('dt');
 
             var titleLink    = elem('a');
             titleLink.target = '_blank';
@@ -94,12 +92,11 @@ SearchResults.prototype = {
             snippet.appendChild( text(snippetText) );
                 // TODO 一致文字の置換（comment, snippet）
 
-
             // comment
             var comment = elem('dd', {class:'hBookmark-search-comment'});
             if (commentText) {
-                comment.appendChild( text(commentText) );
-                // TODO [tag]をマークアップに置換
+                commentText = commentText.replace(/\[([^\[\]]+)\]/g, '<span class="hBookmark-search-tag">$1</span>' + ', ')
+                comment.innerHTML = commentText;
             }
 
 
@@ -124,7 +121,7 @@ SearchResults.prototype = {
 
             // すべて突っ込む
             var dfEntry = document.createDocumentFragment();
-            dfEntry.appendChild(title);
+            dfEntry.appendChild( title );
             dfEntry.appendChild( snippet );
             dfEntry.appendChild( comment );
             dfEntry.appendChild( info );
@@ -138,52 +135,57 @@ SearchResults.prototype = {
         }
     },
     makeRightNav : function() {
-        // table
-        var searchResults   = elem('dl',  {class:'hBookmark-search-results', ns: 1});
-        searchResults.appendChild( this.dfOfAllEntries );
-        var searchInfo      = elem('div', {class:'hBookmark-search-info', ns:1});
-        var searchMore      = elem('div', {class:'hBookmark-search-more', ns:1});
+        if (this.searchSuccess) {
+            var searchResults = elem('dl', {class:'hBookmark-search-results', ns: 1});
+            searchResults.appendChild( this.dfOfAllEntries );
 
-        var searchContainer = elem('div', {class:'hBookmark-search-container'});
-        searchContainer.appendChild( searchInfo );
-        searchContainer.appendChild( searchResults );
-        searchContainer.appendChild( searchMore );
-        var searchHeading   = elem('div', {class:'hBookmark-search-heading'});
+            var searchInfo = elem('div', {class:'hBookmark-search-info', ns:1});
+            var searchMore = elem('div', {class:'hBookmark-search-more', ns:1});
+            var searchContainer = elem('div', {class:'hBookmark-search-container'});
+            searchContainer.appendChild( searchInfo );
+            searchContainer.appendChild( searchResults );
+            searchContainer.appendChild( searchMore );
+        }else{
+            var searchFailure = elem('div', {class:'hBookmark-search-failure'});
+            searchFailure.appendChild( text('はてなブックマークには該当する結果が存在しませんでした') );
+            var searchContainer = elem('div', {class:'hBookmark-search-container'});
+            searchContainer.appendChild( searchFailure );
 
-        var searchDiv       = elem('div', {id:'hBookmark-search', ns:1});
+        }
+
+        var searchTitle = elem('span', {class:'hBookmark-search-title'});
+        searchTitle.appendChild( text('はてなブックマークからの検索') );
+        var searchHeading = elem('div', {class:'hBookmark-search-heading'});
+        searchHeading.appendChild( searchTitle );
+
+        var searchDiv = elem('div', {id: 'hBookmark-search', ns:1});
         searchDiv.appendChild( searchHeading );
         searchDiv.appendChild( searchContainer );
 
-        var mbEnd           = elem('table', {id:'mbEnd'});
+        var mbEnd = elem('table', {id: 'mbEnd'});
         var mbEndCell = mbEnd.insertRow(0).insertCell(0);
-        mbEndCell.appendChild(searchDiv);
+        mbEndCell.appendChild( searchDiv );
 
-        var rhsBlock        = elem('div', {id:'rhs_block'});
+        var rhsBlock = elem('div', {id:'rhs_block'});
         rhsBlock.appendChild( mbEnd );
         this.rhs.appendChild( rhsBlock );
-        console.log(this.rhs); // ここまでうまくいってる！！！！！１
     },
     insert : function() {
         var leftNav = document.querySelector('#leftnav');
-        console.log(leftNav);
         leftNav.parentNode.insertBefore(this.rhs, leftNav);
-        this.rhs.style.position = 'absolute';
-        this.rhs.style.right    = '0';
-        this.rhs.style.top      = '0';
-        this.rhs.style.width    = '264px';
     },
 };
 
-//Googleから盗みはてなに投げ、レスポンスもらうまで
+
 (function() {
     //set
     var searcher = new BookmarkSearch();
     searcher.searchBookmarks(function onSearch(results){
-
         var searchResults = new SearchResults(results.bookmarks);
         searchResults.show();
     });
 })();
+
 
 // Utils
 function elem(elem, opt) {
