@@ -1,5 +1,6 @@
 {
-  "name": "MyBookmarkSearch on Google for Chrome",
+  "name": "My Hatena Bookmark Search on Google",
+  "description": "（はてなブックマークプラスユーザーのみ）Googleの検索結果に自分のブックマークからの全文検索の結果を表示",
   "background_page": "background.html",
   "content_scripts": [
     {
