@@ -45,6 +45,7 @@ function SearchResults(entries) {
     this.searchSuccess  = false;
     this.dfOfAllEntries = document.createDocumentFragment();
     this.rhs            = elem('div', {id:'rhs'});
+    this.rhs.style.width = '300px';
 }
 
 SearchResults.prototype = {
@@ -75,10 +76,12 @@ SearchResults.prototype = {
 
             // タイトル部
             var title        = elem('dt');
+            title.style.fontSize = '14px';
 
             var titleLink    = elem('a');
             titleLink.target = '_blank';
             titleLink.href   = entryURL;
+
 
             var favicon      = elem('img');
             favicon.src      = faviconURL;
@@ -114,6 +117,7 @@ SearchResults.prototype = {
             var bookmarkCount    = elem('a');
             bookmarkCount.target = '_blank';
             bookmarkCount.href   = 'http://b.hatena.ne.jp/entry/' + host;
+            bookmarkCount.style.className = 'l';
             bookmarkCount.appendChild( bookmarkImg );
 
             info.appendChild( searchURL );
@@ -157,10 +161,11 @@ SearchResults.prototype = {
 
         var searchTitle = elem('span', {class:'hBookmark-search-title'});
         searchTitle.appendChild( text('はてなブックマークからの検索') );
+        searchTitle.style.fontSize = '15px';
         var searchHeading = elem('div', {class:'hBookmark-search-heading'});
         searchHeading.appendChild( searchTitle );
 
-        var searchDiv = elem('div', {id: 'hBookmark-search', ns: true});
+        var searchDiv = elem('div', {id: 'hBookmark-search', ns: true, styles: { width: '300px', fontSize: '12px' }});
         searchDiv.appendChild( searchHeading );
         searchDiv.appendChild( searchContainer );
 
@@ -192,6 +197,11 @@ function elem(elem, opt) {
         if (opt.id)   { newElem.id           = opt.id; }
         if (opt.class){ newElem.className    = opt.class; }
         if (opt.ns)   { newElem.namespaceURI = 'http://www.w3.org/1999/xhtml'; }
+        if (opt.styles) {
+            for (var key in opt.styles) {
+                newElem.style[key] = opt.styles[key];
+            }
+        }
     }
     return newElem;
 }
