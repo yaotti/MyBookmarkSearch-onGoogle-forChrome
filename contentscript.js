@@ -6,13 +6,14 @@ var BookmarkSearch = function() {
     this.sort     = 'date'; // date, scores, users
 }
 
+
 BookmarkSearch.prototype = {
     setUserName : function(onSetUserName) {
         var that = this;
-	    chrome.extension.sendRequest('http://b.hatena.ne.jp/my.name', function onSuccess(res) {
-                that.userName = JSON.parse(res).name;
-                onSetUserName();
-	    });
+        chrome.extension.sendRequest('http://b.hatena.ne.jp/my.name', function onSuccess(res) {
+            that.userName = JSON.parse(res).name;
+            onSetUserName();
+        });
     },
     setSearchWords : function() {
         var params = window.location.search.substring(1).split('&');
@@ -29,10 +30,10 @@ BookmarkSearch.prototype = {
         var that = this;
         this.setUserName(function onSetUserName() {
             that.setSearchWords();
-	        chrome.extension.sendRequest(that.makeQuery(), function onSuccess(res) {
+            chrome.extension.sendRequest(that.makeQuery(), function onSuccess(res) {
                 var json = JSON.parse(res);
                 onSearch(json);
-	        });
+            });
         });
     },
 
@@ -90,7 +91,7 @@ SearchResults.prototype = {
             // snippet
             var snippet = elem('dd', {class:'hBookmark-search-snippet'});
             snippet.appendChild( text(snippetText) );
-                // TODO 一致文字の置換（comment, snippet）
+            // TODO 一致文字の置換（comment, snippet）
 
             // comment
             var comment = elem('dd', {class:'hBookmark-search-comment'});
