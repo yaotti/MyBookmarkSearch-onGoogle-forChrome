@@ -42,7 +42,7 @@ BookmarkSearch.prototype = {
 
 function SearchResults(entries) {
     this.entries        = entries;
-    this.searchSuccess  = 0;
+    this.searchSuccess  = false;
     this.dfOfAllEntries = document.createDocumentFragment();
     this.rhs            = elem('div', {id:'rhs'});
 }
@@ -50,7 +50,7 @@ function SearchResults(entries) {
 SearchResults.prototype = {
     show : function() {
         if (this.searchResultsExists()) {
-            this.searchSuccess = 1;
+            this.searchSuccess = true;
             this.makeDfOfAllEntries();
         }
         this.initRightNav();
@@ -58,7 +58,7 @@ SearchResults.prototype = {
         this.insert();
     },
     searchResultsExists : function() {
-        return  (this.entries.length) ? 1 : 0;
+        return this.entries.length > 0;
     },
     makeDfOfAllEntries : function() {
         for (var i = 0; i < this.entries.length; i++) {
@@ -137,11 +137,11 @@ SearchResults.prototype = {
     },
     makeRightNav : function() {
         if (this.searchSuccess) {
-            var searchResults = elem('dl', {class:'hBookmark-search-results', ns: 1});
+            var searchResults = elem('dl', {class:'hBookmark-search-results', ns: true});
             searchResults.appendChild( this.dfOfAllEntries );
 
-            var searchInfo = elem('div', {class:'hBookmark-search-info', ns:1});
-            var searchMore = elem('div', {class:'hBookmark-search-more', ns:1});
+            var searchInfo = elem('div', {class:'hBookmark-search-info', ns: true});
+            var searchMore = elem('div', {class:'hBookmark-search-more', ns: true});
             var searchContainer = elem('div', {class:'hBookmark-search-container'});
             searchContainer.appendChild( searchInfo );
             searchContainer.appendChild( searchResults );
@@ -159,7 +159,7 @@ SearchResults.prototype = {
         var searchHeading = elem('div', {class:'hBookmark-search-heading'});
         searchHeading.appendChild( searchTitle );
 
-        var searchDiv = elem('div', {id: 'hBookmark-search', ns:1});
+        var searchDiv = elem('div', {id: 'hBookmark-search', ns: true});
         searchDiv.appendChild( searchHeading );
         searchDiv.appendChild( searchContainer );
 
