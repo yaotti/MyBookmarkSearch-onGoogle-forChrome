@@ -7,7 +7,8 @@
       "js": [ "contentscript.js" ],
       "css": [ "style.css" ],
       "run_at": "document_end",
-      "matches": [ "http://www.google.co.jp/*" ]
+      "matches": [ "http://www.google.co.jp/*",
+                   "http://www.google.com/*" ]
     }
   ],
   "version": "0.2",
