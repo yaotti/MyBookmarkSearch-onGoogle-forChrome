@@ -163,12 +163,8 @@ SearchResults.prototype = {
         searchDiv.appendChild( searchHeading );
         searchDiv.appendChild( searchContainer );
 
-        var mbEnd = elem('table', {id: 'mbEnd'});
-        var mbEndCell = mbEnd.insertRow(0).insertCell(0);
-        mbEndCell.appendChild( searchDiv );
-
         var rhsBlock = elem('div', {id:'rhs_block'});
-        rhsBlock.appendChild( mbEnd );
+        rhsBlock.appendChild( searchDiv );
         this.rhs.appendChild( rhsBlock );
     },
     insert : function() {
