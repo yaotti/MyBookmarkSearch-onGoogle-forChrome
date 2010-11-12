@@ -136,20 +136,21 @@ SearchResults.prototype = {
         }
     },
     makeRightNav : function() {
+        var searchContainer;
         if (this.searchSuccess) {
             var searchResults = elem('dl', {class:'hBookmark-search-results', ns: true});
             searchResults.appendChild( this.dfOfAllEntries );
 
             var searchInfo = elem('div', {class:'hBookmark-search-info', ns: true});
             var searchMore = elem('div', {class:'hBookmark-search-more', ns: true});
-            var searchContainer = elem('div', {class:'hBookmark-search-container'});
+            searchContainer = elem('div', {class:'hBookmark-search-container'});
             searchContainer.appendChild( searchInfo );
             searchContainer.appendChild( searchResults );
             searchContainer.appendChild( searchMore );
         }else{
             var searchFailure = elem('div', {class:'hBookmark-search-failure'});
             searchFailure.appendChild( text('はてなブックマークには該当する結果が存在しませんでした') );
-            var searchContainer = elem('div', {class:'hBookmark-search-container'});
+            searchContainer = elem('div', {class:'hBookmark-search-container'});
             searchContainer.appendChild( searchFailure );
 
         }
