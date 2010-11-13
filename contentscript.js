@@ -1,25 +1,28 @@
 var BookmarkSearch = function() {
     this.userName = undefined;
     this.q        = '';
+    this.prev_q   = '';
     this.of       = '0';    // offset
     this.limit    = '10';   // max 100
     this.sort     = 'date'; // date, scores, users
 }
 
 
+
 BookmarkSearch.prototype = {
     setUserName : function(onSetUserName) {
-        var that = this;
-        chrome.extension.sendRequest('http://b.hatena.ne.jp/my.name', function onSuccess(res) {
-            that.userName = JSON.parse(res).name;
+        if (!!this.userName) {
+            onSetUserName();
+            return;
+        }
+        var self = this;
+        chrome.extension.sendRequest('http://b.hatena.ne.jp/my.name', function(res) {
+            self.userName = JSON.parse(res).name;
             onSetUserName();
         });
     },
     setSearchWords : function() {
-        var params = window.location.search.substring(1).split('&');
-        for (var i = 0; i < params.length; i++) {
-            if (/^q=(.+)/.test(params[i])) this.q = params[i].split('=')[1];
-        }
+        this.q = document.getElementsByName('q')[0].value.replace(/^\s+|\s+$/g, '').replace(/\s+/g, '+');
     },
     makeQuery : function() {
         var query =  'http://b.hatena.ne.jp/' + this.userName + '/search/json';
@@ -27,10 +30,12 @@ BookmarkSearch.prototype = {
         return query;
     },
     searchBookmarks : function(onSearch) {
-        var that = this;
-        this.setUserName(function onSetUserName() {
-            that.setSearchWords();
-            chrome.extension.sendRequest(that.makeQuery(), function onSuccess(res) {
+        this.setSearchWords();
+        if (this.q == this.prev_q) return;
+        this.prev_q = this.q;
+        var self = this;
+        this.setUserName(function (){
+            chrome.extension.sendRequest(self.makeQuery(), function(res) {
                 var json = JSON.parse(res);
                 onSearch(json);
             });
@@ -39,13 +44,16 @@ BookmarkSearch.prototype = {
 
 };
 
-
 function SearchResults(entries) {
     this.entries        = entries;
     this.searchSuccess  = false;
     this.dfOfAllEntries = document.createDocumentFragment();
-    this.rhs            = elem('div', {id:'rhs'});
-    this.rhs.style.width = '300px';
+    this.hbResultArea   = elem('div',
+                               {id:'hBookmark-result-area',
+                                styles: { width: '300px',
+                                          position: 'absolute',
+                                          right: '0px',
+                                          top: '0px'}});
 }
 
 SearchResults.prototype = {
@@ -57,6 +65,7 @@ SearchResults.prototype = {
         this.initRightNav();
         this.makeRightNav();
         this.insert();
+        this.hbResultArea = null;
     },
     searchResultsExists : function() {
         return this.entries.length > 0;
@@ -134,10 +143,16 @@ SearchResults.prototype = {
         }
     },
     initRightNav : function() {
-        var rightNav = document.querySelector('#rhs');
-        if(rightNav){
-            rightNav.parentNode.removeChild(rightNav);
+        if (this.hbResultArea && this.hbResultArea.parentNode) {
+            this.hbResultArea.parentNode.removeChild(this.hbResultArea);
         }
+        this.hbResultArea = elem('div',
+                                 {id:'hBookmark-result-area',
+                                  styles: { width: '300px',
+                                            position: 'absolute',
+                                            right: '0px',
+                                            top: '0px'}});
+
     },
     makeRightNav : function() {
         var searchContainer;
@@ -156,7 +171,6 @@ SearchResults.prototype = {
             searchFailure.appendChild( text('はてなブックマークには該当する結果が存在しませんでした') );
             searchContainer = elem('div', {class:'hBookmark-search-container'});
             searchContainer.appendChild( searchFailure );
-
         }
 
         var searchTitle = elem('span', {class:'hBookmark-search-title'});
@@ -165,30 +179,26 @@ SearchResults.prototype = {
         var searchHeading = elem('div', {class:'hBookmark-search-heading'});
         searchHeading.appendChild( searchTitle );
 
-        var searchDiv = elem('div', {id: 'hBookmark-search', ns: true, styles: { width: '300px', fontSize: '12px' }});
+        var searchDiv = elem('div', {id: 'hBookmark-search', ns: true, styles: { width: '290px', fontSize: '12px' }});
         searchDiv.appendChild( searchHeading );
         searchDiv.appendChild( searchContainer );
 
+        if (document.getElementById('rhs_block')) {
+            document.getElementById('rhs_block').parentNode.removeChild(document.getElementById('rhs_block'));
+        }
         var rhsBlock = elem('div', {id:'rhs_block'});
         rhsBlock.appendChild( searchDiv );
-        this.rhs.appendChild( rhsBlock );
+        this.hbResultArea.appendChild( rhsBlock );
     },
     insert : function() {
-        var leftNav = document.querySelector('#leftnav');
-        leftNav.parentNode.insertBefore(this.rhs, leftNav);
+        var centerColumn = document.querySelector('#center_col');
+        if(centerColumn){
+            centerColumn.style.width = '562px';
+            centerColumn.style.marginRight = '10px';
+            centerColumn.parentNode.appendChild(this.hbResultArea);
+        }
     },
 };
-
-
-(function() {
-    //set
-    var searcher = new BookmarkSearch();
-    searcher.searchBookmarks(function onSearch(results){
-        var searchResults = new SearchResults(results.bookmarks);
-        searchResults.show();
-    });
-})();
-
 
 // Utils
 function elem(elem, opt) {
@@ -209,3 +219,12 @@ function elem(elem, opt) {
 function text(text) {
     return document.createTextNode(text);
 }
+
+
+var searcher = new BookmarkSearch();
+window.setInterval(function() {
+    searcher.searchBookmarks(function (results){
+        var searchResults = new SearchResults(results.bookmarks);
+        searchResults.show();
+    });
+}, 500);
